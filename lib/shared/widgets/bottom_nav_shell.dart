@@ -41,14 +41,7 @@ class _BottomNavShellState extends State<BottomNavShell> {
         destinations: [
           NavigationDestination(
             icon: const AppIcon(size: 24),
-            selectedIcon: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const AppIcon(size: 24),
-            ),
+            selectedIcon: const AppIcon(size: 24),
             label: 'Sessions',
           ),
           const NavigationDestination(
