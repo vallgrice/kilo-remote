@@ -168,4 +168,4 @@ dio.post(endpoint, data: {
 
 ## License
 
-See [LICENSE](LICENSE) for details.
+MIT License - See [LICENSE](LICENSE) for details.
