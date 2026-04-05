@@ -20,6 +20,18 @@ class ProfileScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
+        leading: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Material(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(8),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(8),
+              onTap: () => context.go('/sessions'),
+              child: const Icon(Icons.arrow_back, size: 20),
+            ),
+          ),
+        ),
         title: const Row(
           children: [
             Icon(Icons.person_outline, size: 24),

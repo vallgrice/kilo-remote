@@ -8,10 +8,8 @@ import '../../features/sessions/screens/sessions_screen.dart';
 import '../../features/chat/screens/chat_screen.dart';
 import '../../features/profile/screens/profile_screen.dart';
 import '../../features/auth/providers/auth_provider.dart';
-import '../widgets/bottom_nav_shell.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
-final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);
@@ -42,26 +40,13 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
-      ShellRoute(
-        navigatorKey: _shellNavigatorKey,
-        builder: (context, state, child) {
-          final location = state.matchedLocation;
-          final currentIndex = location == '/profile' ? 1 : 0;
-          return BottomNavShell(
-            currentIndex: currentIndex,
-            child: child,
-          );
-        },
-        routes: [
-          GoRoute(
-            path: '/sessions',
-            builder: (context, state) => const SessionsScreen(),
-          ),
-          GoRoute(
-            path: '/profile',
-            builder: (context, state) => const ProfileScreen(),
-          ),
-        ],
+      GoRoute(
+        path: '/sessions',
+        builder: (context, state) => const SessionsScreen(),
+      ),
+      GoRoute(
+        path: '/profile',
+        builder: (context, state) => const ProfileScreen(),
       ),
       GoRoute(
         path: '/chat/:sessionId',

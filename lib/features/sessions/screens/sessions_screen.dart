@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/sessions_provider.dart';
 import '../widgets/session_card.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/widgets/app_icon.dart';
 import '../../../shared/widgets/empty_state.dart';
@@ -24,6 +25,35 @@ class SessionsScreen extends ConsumerWidget {
             const Text('Sessions', style: TextStyle(fontWeight: FontWeight.w600)),
           ],
         ),
+        actions: [
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: IconButton(
+              onPressed: () => context.go('/profile'),
+              icon: const Icon(Icons.person_outline, size: 20),
+              tooltip: 'Profile',
+            ),
+          ),
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: IconButton(
+              onPressed: () async {
+                await ref.read(authProvider.notifier).signOut();
+                if (context.mounted) context.go('/login');
+              },
+              icon: const Icon(Icons.logout, size: 20),
+              tooltip: 'Sign out',
+            ),
+          ),
+        ],
       ),
       body: RefreshIndicator(
         color: AppColors.primary,
