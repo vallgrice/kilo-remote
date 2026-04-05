@@ -21,22 +21,37 @@ class MessageBubble extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: isUser ? AppColors.primary : AppColors.surface,
-          borderRadius: BorderRadius.circular(16).copyWith(
-            bottomRight: isUser ? const Radius.circular(4) : null,
-            bottomLeft: !isUser ? const Radius.circular(4) : null,
+          gradient: isUser
+              ? const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [AppColors.primary, AppColors.primaryDark],
+                )
+              : null,
+          color: isUser ? null : AppColors.surface,
+          border: isUser ? null : Border.all(color: AppColors.border.withOpacity(0.5)),
+          borderRadius: BorderRadius.circular(18).copyWith(
+            bottomRight: isUser ? const Radius.circular(6) : null,
+            bottomLeft: !isUser ? const Radius.circular(6) : null,
           ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            for (final part in message.parts) ...[
-              PartRenderer(part: part),
-              if (part != message.parts.last) const SizedBox(height: 8),
+        child: DefaultTextStyle(
+          style: TextStyle(
+            color: isUser ? AppColors.onPrimary : AppColors.textPrimary,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (final part in message.parts) ...[
+                PartRenderer(part: part),
+                if (part != message.parts.last) const SizedBox(height: 8),
+              ],
+              if (message.parts.isEmpty && isUser)
+                Text('...', style: TextStyle(
+                  color: isUser ? AppColors.onPrimary.withOpacity(0.6) : AppColors.textSecondary,
+                )),
             ],
-            if (message.parts.isEmpty && isUser)
-              const Text('...', style: TextStyle(color: AppColors.textSecondary)),
-          ],
+          ),
         ),
       ),
     );
