@@ -1,16 +1,23 @@
 import 'package:go_router/go_router.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/webview_auth_screen.dart';
 import '../../features/auth/screens/device_auth_screen.dart';
 import '../../features/sessions/screens/sessions_screen.dart';
 import '../../features/chat/screens/chat_screen.dart';
+import '../../features/profile/screens/profile_screen.dart';
 import '../../features/auth/providers/auth_provider.dart';
+import '../widgets/bottom_nav_shell.dart';
+
+final _rootNavigatorKey = GlobalKey<NavigatorState>();
+final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);
 
   return GoRouter(
+    navigatorKey: _rootNavigatorKey,
     initialLocation: '/sessions',
     redirect: (context, state) {
       final isAuthenticated = authState.valueOrNull != null;
@@ -33,11 +40,28 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: 'device',
             builder: (context, state) => const DeviceAuthScreen(),
           ),
-        ],
+        ),
       ),
-      GoRoute(
-        path: '/sessions',
-        builder: (context, state) => const SessionsScreen(),
+      ShellRoute(
+        navigatorKey: _shellNavigatorKey,
+        builder: (context, state, child) {
+          final location = state.matchedLocation;
+          final currentIndex = location == '/profile' ? 1 : 0;
+          return BottomNavShell(
+            currentIndex: currentIndex,
+            child: child,
+          );
+        },
+        routes: [
+          GoRoute(
+            path: '/sessions',
+            builder: (context, state) => const SessionsScreen(),
+          ),
+          GoRoute(
+            path: '/profile',
+            builder: (context, state) => const ProfileScreen(),
+          ),
+        ],
       ),
       GoRoute(
         path: '/chat/:sessionId',
