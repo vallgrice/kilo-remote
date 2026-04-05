@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../shared/theme/app_colors.dart';
 
 enum EmptyStateType {
@@ -13,6 +14,7 @@ class EmptyState extends StatelessWidget {
   final String? customSubtitle;
   final VoidCallback? onAction;
   final String? actionLabel;
+  final bool useIllustration;
 
   const EmptyState({
     super.key,
@@ -21,6 +23,7 @@ class EmptyState extends StatelessWidget {
     this.customSubtitle,
     this.onAction,
     this.actionLabel,
+    this.useIllustration = false,
   });
 
   @override
@@ -33,7 +36,7 @@ class EmptyState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _buildIllustration(icon),
+            useIllustration ? _buildSvgIllustration() : _buildIllustration(icon),
             const SizedBox(height: 24),
             Text(
               title,
@@ -68,6 +71,20 @@ class EmptyState extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildSvgIllustration() {
+    final svgPath = switch (type) {
+      EmptyStateType.sessions => 'assets/illustrations/empty_sessions.svg',
+      EmptyStateType.chat => 'assets/illustrations/empty_chat.svg',
+      EmptyStateType.usage => 'assets/illustrations/empty_usage.svg',
+    };
+
+    return SvgPicture.asset(
+      svgPath,
+      width: 120,
+      height: 120,
     );
   }
 
