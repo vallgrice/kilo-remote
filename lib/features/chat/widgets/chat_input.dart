@@ -64,9 +64,12 @@ class _ChatInputState extends ConsumerState<ChatInput> {
                     onChanged: (m) => ref.read(selectedModeProvider.notifier).state = m,
                   ),
                 ),
-                ModelPicker(
-                  selected: model,
-                  onChanged: (m) => ref.read(selectedModelProvider.notifier).setModel(m),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ModelPicker(
+                    selected: model,
+                    onChanged: (m) => ref.read(selectedModelProvider.notifier).setModel(m),
+                  ),
                 ),
               ],
             ),
