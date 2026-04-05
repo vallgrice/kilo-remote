@@ -1,19 +1,19 @@
-# Kilo Remote Flutter
+# Kilo Remote 📱
 
 Remote client for [Kilo CLI](https://github.com/Kilo-Org/kilocode) - a Flutter mobile application for iOS and Android.
 
 This application is designed to work with the [Kilo CLI](https://github.com/Kilo-Org/kilocode) to provide a mobile interface for managing CLI sessions.
 
-## Features
+## Features ✨
 
-- **Sessions Management** - View and manage active Kilo CLI sessions remotely
-- **Real-time Chat** - Send messages and receive responses from AI models
-- **Model Selection** - Choose between OpenRouter models or your own API keys (BYOK)
-- **Usage Statistics** - Track requests, tokens, and costs with a visual calendar
-- **User Profile** - View profile information and manage API keys
-- **Dark Theme** - Optimized dark UI for comfortable use
+- **Sessions Management** 💻 - View and manage active Kilo CLI sessions remotely
+- **Real-time Chat** 💬 - Send messages and receive responses from AI models
+- **Model Selection** 🔑 - Choose between OpenRouter models or your own API keys (BYOK)
+- **Usage Statistics** 📊 - Track requests, tokens, and costs with a visual calendar
+- **User Profile** 👤 - View profile information and manage API keys
+- **Dark Theme** 🌙 - Optimized dark UI for comfortable use
 
-## Requirements
+## Requirements 🔧
 
 - Flutter SDK 3.5.4+
 - Android SDK
@@ -139,7 +139,7 @@ dio.post(endpoint, data: {
 });
 ```
 
-## Tech Stack
+## Tech Stack 🛠️
 
 | Category | Technology |
 |----------|------------|
