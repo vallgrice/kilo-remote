@@ -43,7 +43,7 @@ class MessageBubble extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               for (final part in message.parts) ...[
-                PartRenderer(part: part),
+                PartRenderer(part: part, isUserMessage: isUser),
                 if (part != message.parts.last) const SizedBox(height: 8),
               ],
               if (message.parts.isEmpty && isUser)

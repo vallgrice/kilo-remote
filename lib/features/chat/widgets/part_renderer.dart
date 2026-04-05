@@ -17,8 +17,9 @@ import 'tool_cards/generic_tool_card.dart';
 
 class PartRenderer extends StatelessWidget {
   final Part part;
+  final bool isUserMessage;
 
-  const PartRenderer({super.key, required this.part});
+  const PartRenderer({super.key, required this.part, this.isUserMessage = false});
 
   @override
   Widget build(BuildContext context) {
@@ -27,16 +28,24 @@ class PartRenderer extends StatelessWidget {
           ? MarkdownBody(
               data: text,
               styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
-                p: const TextStyle(fontSize: 14, height: 1.5),
+                p: TextStyle(fontSize: 14, height: 1.5, color: isUserMessage ? AppColors.onPrimary : AppColors.textPrimary),
+                h1: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isUserMessage ? AppColors.onPrimary : AppColors.textPrimary),
+                h2: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: isUserMessage ? AppColors.onPrimary : AppColors.textPrimary),
+                h3: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: isUserMessage ? AppColors.onPrimary : AppColors.textPrimary),
+                em: TextStyle(fontStyle: FontStyle.italic, color: isUserMessage ? AppColors.onPrimary : AppColors.textPrimary),
+                strong: TextStyle(fontWeight: FontWeight.bold, color: isUserMessage ? AppColors.onPrimary : AppColors.textPrimary),
                 code: TextStyle(
                   fontSize: 13,
                   fontFamily: 'monospace',
-                  backgroundColor: AppColors.codeBackground,
+                  backgroundColor: isUserMessage ? AppColors.onPrimary.withOpacity(0.15) : AppColors.codeBackground,
+                  color: isUserMessage ? AppColors.onPrimary : null,
                 ),
                 codeblockDecoration: BoxDecoration(
-                  color: AppColors.codeBackground,
+                  color: isUserMessage ? AppColors.onPrimary.withOpacity(0.15) : AppColors.codeBackground,
                   borderRadius: BorderRadius.circular(6),
                 ),
+                a: TextStyle(color: isUserMessage ? AppColors.onPrimary : AppColors.primary, decoration: TextDecoration.underline),
+                listBullet: TextStyle(color: isUserMessage ? AppColors.onPrimary : AppColors.textPrimary),
               ),
               selectable: true,
             )
