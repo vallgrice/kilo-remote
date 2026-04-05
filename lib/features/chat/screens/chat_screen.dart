@@ -51,18 +51,6 @@ class ChatScreen extends ConsumerWidget {
         final isConnected = state.connectionState == transport.ConnectionState.connected;
         final canSend = isConnected && !state.isStreaming;
 
-        if (state.error != null) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            showAppSnackbar(
-              context,
-              message: state.error!,
-              type: SnackbarType.error,
-              actionLabel: 'Dismiss',
-              onAction: () => notifier.clearError(),
-            );
-          });
-        }
-
         return Scaffold(
           appBar: _buildAppBar(context, state, isConnected, sessionMeta,
             onInterrupt: state.isStreaming ? () => notifier.interrupt() : null,
