@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../providers/session_notifier.dart';
 import '../widgets/message_list.dart';
 import '../widgets/chat_input.dart';
@@ -8,6 +9,7 @@ import '../widgets/permission_card.dart';
 import '../widgets/question_card.dart';
 import '../../../core/transport/web_socket_transport.dart' as transport;
 import '../../../shared/theme/app_colors.dart';
+import '../../sessions/providers/sessions_provider.dart';
 
 class ChatScreen extends ConsumerWidget {
   final String sessionId;
@@ -17,14 +19,16 @@ class ChatScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final sessionAsync = ref.watch(sessionNotifierProvider(sessionId));
+    final sessions = ref.watch(activeSessionsProvider).valueOrNull ?? [];
+    final sessionMeta = sessions.where((s) => s.id == sessionId).firstOrNull;
 
     return sessionAsync.when(
       loading: () => Scaffold(
-        appBar: AppBar(title: const Text('Session')),
-        body: const Center(child: CircularProgressIndicator()),
+        appBar: _buildAppBar(context, null, false, sessionMeta),
+        body: Center(child: CircularProgressIndicator(color: AppColors.primary)),
       ),
       error: (e, _) => Scaffold(
-        appBar: AppBar(title: const Text('Session')),
+        appBar: _buildAppBar(context, null, false, sessionMeta),
         body: Center(child: Text('Error: $e', style: const TextStyle(color: AppColors.error))),
       ),
       data: (state) {
@@ -33,30 +37,11 @@ class ChatScreen extends ConsumerWidget {
         final canSend = isConnected && !state.isStreaming;
 
         return Scaffold(
-          appBar: AppBar(
-            title: const Text('Remote Session'),
-            actions: [
-              // Connection indicator
-              Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: Icon(
-                  Icons.circle,
-                  size: 10,
-                  color: isConnected ? AppColors.success : AppColors.error,
-                ),
-              ),
-              // Interrupt button
-              if (state.isStreaming)
-                IconButton(
-                  onPressed: () => notifier.interrupt(),
-                  icon: const Icon(Icons.stop_circle, color: AppColors.error),
-                  tooltip: 'Interrupt',
-                ),
-            ],
+          appBar: _buildAppBar(context, state, isConnected, sessionMeta,
+            onInterrupt: state.isStreaming ? () => notifier.interrupt() : null,
           ),
           body: Column(
             children: [
-              // Error banner
               if (state.error != null)
                 MaterialBanner(
                   content: Text(state.error!),
@@ -68,32 +53,29 @@ class ChatScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
-              // Message list
               Expanded(
                 child: MessageList(
                   messages: state.messages,
                   isStreaming: state.isStreaming,
+                  hasMore: state.hasMore,
+                  onLoadMore: () => notifier.loadMore(),
                 ),
               ),
-              // Working indicator
               WorkingIndicator(
                 messages: state.messages,
                 isStreaming: state.isStreaming,
               ),
-              // Permission dock
               if (state.activePermission != null)
                 PermissionCardWidget(
                   permission: state.activePermission!,
                   onRespond: (id, response) => notifier.respondToPermission(id, response),
                 ),
-              // Question dock
               if (state.activeQuestion != null && state.activePermission == null)
                 QuestionCardWidget(
                   question: state.activeQuestion!,
                   onAnswer: (id, answers) => notifier.answerQuestion(id, answers),
                   onReject: (id) => notifier.rejectQuestion(id),
                 ),
-              // Chat input
               ChatInput(
                 canSend: canSend,
                 onSend: (text, {mode, model}) =>
@@ -103,6 +85,62 @@ class ChatScreen extends ConsumerWidget {
           ),
         );
       },
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar(
+    BuildContext context,
+    SessionState? state,
+    bool isConnected,
+    dynamic sessionMeta, {
+    VoidCallback? onInterrupt,
+  }) {
+    final title = sessionMeta?.title ?? 'Session';
+    final branch = sessionMeta?.gitBranch;
+
+    return AppBar(
+      leading: Padding(
+        padding: const EdgeInsets.all(8),
+        child: Material(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(8),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(8),
+            onTap: () => context.go('/sessions'),
+            child: const Icon(Icons.arrow_back, size: 20),
+          ),
+        ),
+      ),
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+          if (branch != null)
+            Text(branch, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+        ],
+      ),
+      actions: [
+        Padding(
+          padding: const EdgeInsets.only(right: 12),
+          child: Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(
+              color: isConnected ? AppColors.success : AppColors.error,
+              shape: BoxShape.circle,
+              boxShadow: isConnected
+                  ? [BoxShadow(color: AppColors.success.withOpacity(0.4), blurRadius: 6)]
+                  : null,
+            ),
+          ),
+        ),
+        if (onInterrupt != null)
+          IconButton(
+            onPressed: onInterrupt,
+            icon: const Icon(Icons.stop_circle, color: AppColors.error),
+            tooltip: 'Interrupt',
+          ),
+      ],
     );
   }
 }
