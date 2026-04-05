@@ -6,8 +6,16 @@ import 'message_bubble.dart';
 class MessageList extends StatefulWidget {
   final List<StoredMessage> messages;
   final bool isStreaming;
+  final bool hasMore;
+  final VoidCallback? onLoadMore;
 
-  const MessageList({super.key, required this.messages, required this.isStreaming});
+  const MessageList({
+    super.key,
+    required this.messages,
+    required this.isStreaming,
+    this.hasMore = false,
+    this.onLoadMore,
+  });
 
   @override
   State<MessageList> createState() => _MessageListState();
@@ -16,7 +24,6 @@ class MessageList extends StatefulWidget {
 class _MessageListState extends State<MessageList> {
   final _scrollController = ScrollController();
   bool _showScrollToBottom = false;
-  bool _autoScroll = true;
 
   @override
   void initState() {
@@ -24,28 +31,27 @@ class _MessageListState extends State<MessageList> {
     _scrollController.addListener(_onScroll);
   }
 
-  @override
-  void didUpdateWidget(covariant MessageList oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (_autoScroll && widget.messages.length != oldWidget.messages.length) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
-    }
-  }
-
   void _onScroll() {
-    final maxScroll = _scrollController.position.maxScrollExtent;
-    final currentScroll = _scrollController.position.pixels;
-    final atBottom = maxScroll - currentScroll < 100;
-    setState(() {
-      _showScrollToBottom = !atBottom;
-      _autoScroll = atBottom;
-    });
+    if (!_scrollController.hasClients) return;
+    final offset = _scrollController.offset;
+    final max = _scrollController.position.maxScrollExtent;
+
+    // In a reversed list, offset 0 = bottom, max = top.
+    // Load more when user scrolls near the top (old messages).
+    if (offset > max - 200 && widget.hasMore && widget.onLoadMore != null) {
+      widget.onLoadMore!();
+    }
+
+    final atBottom = offset < 100;
+    if (_showScrollToBottom == atBottom) {
+      setState(() => _showScrollToBottom = !atBottom);
+    }
   }
 
   void _scrollToBottom() {
     if (_scrollController.hasClients) {
       _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
+        0,
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeOut,
       );
@@ -60,14 +66,36 @@ class _MessageListState extends State<MessageList> {
 
   @override
   Widget build(BuildContext context) {
+    final itemCount = widget.messages.length + (widget.hasMore ? 1 : 0);
+
     return Stack(
       children: [
         ListView.builder(
           controller: _scrollController,
+          reverse: true,
           padding: const EdgeInsets.symmetric(vertical: 8),
-          itemCount: widget.messages.length,
+          itemCount: itemCount,
           itemBuilder: (context, index) {
-            return MessageBubble(message: widget.messages[index]);
+            // In reverse mode, index 0 = last message (newest).
+            // The "load more" indicator goes at the highest index (top of chat).
+            if (widget.hasMore && index == itemCount - 1) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: Center(
+                  child: SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                ),
+              );
+            }
+            // Map reversed index back to message list order.
+            final msgIndex = widget.hasMore
+                ? widget.messages.length - 1 - index
+                : widget.messages.length - 1 - index;
+            final msg = widget.messages[msgIndex];
+            return MessageBubble(key: ValueKey(msg.info.id), message: msg);
           },
         ),
         if (_showScrollToBottom)
@@ -75,12 +103,9 @@ class _MessageListState extends State<MessageList> {
             right: 16,
             bottom: 16,
             child: FloatingActionButton.small(
-              onPressed: () {
-                _autoScroll = true;
-                _scrollToBottom();
-              },
+              onPressed: _scrollToBottom,
               backgroundColor: AppColors.surfaceElevated,
-              child: const Icon(Icons.keyboard_arrow_down, color: Colors.white),
+              child: const Icon(Icons.keyboard_arrow_down, color: AppColors.textPrimary),
             ),
           ),
       ],

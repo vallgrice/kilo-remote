@@ -18,14 +18,25 @@ class ModeSelector extends StatelessWidget {
           final isSelected = mode == selected;
           return Padding(
             padding: const EdgeInsets.only(right: 6),
-            child: ChoiceChip(
-              label: Text(mode[0].toUpperCase() + mode.substring(1)),
-              selected: isSelected,
-              onSelected: (_) => onChanged(mode),
-              visualDensity: VisualDensity.compact,
-              labelStyle: TextStyle(
-                fontSize: 12,
-                color: isSelected ? Colors.white : AppColors.textSecondary,
+            child: GestureDetector(
+              onTap: () => onChanged(mode),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: isSelected ? AppColors.primary.withOpacity(0.15) : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: isSelected ? AppColors.primary.withOpacity(0.3) : AppColors.border,
+                  ),
+                ),
+                child: Text(
+                  mode[0].toUpperCase() + mode.substring(1),
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
+                    color: isSelected ? AppColors.primary : AppColors.textSecondary,
+                  ),
+                ),
               ),
             ),
           );
