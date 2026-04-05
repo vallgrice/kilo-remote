@@ -19,6 +19,15 @@ class ProfileScreen extends ConsumerWidget {
     final usagePeriodsAsync = ref.watch(usagePeriodsProvider((period: selectedPeriod, groupByModel: false)));
 
     return Scaffold(
+      appBar: AppBar(
+        title: const Row(
+          children: [
+            Icon(Icons.person_outline, size: 24),
+            SizedBox(width: 12),
+            Text('Profile', style: TextStyle(fontWeight: FontWeight.w600)),
+          ],
+        ),
+      ),
       body: RefreshIndicator(
         color: AppColors.primary,
         onRefresh: () async {
