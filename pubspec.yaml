@@ -15,6 +15,7 @@ dependencies:
   dio: ^5.8.0+1
   flutter_markdown: ^0.7.7
   flutter_secure_storage: ^9.2.4
+  shared_preferences: ^2.3.5
   webview_flutter: ">=4.0.0 <4.11.0"
   flutter_inappwebview: ^6.1.5
   url_launcher: ^6.3.1
@@ -25,6 +26,7 @@ dependencies:
   freezed_annotation: ^2.4.4
   dio_cookie_manager: ^3.1.1
   cookie_jar: ^4.0.8
+  flutter_svg: ^2.0.10+1
   webview_flutter_android: ">=3.0.0 <4.0.0"
 
 dev_dependencies:
@@ -44,9 +46,10 @@ flutter_launcher_icons:
   ios: false
   image_path: "assets/icon/app_icon.png"
   adaptive_icon_background: "#D4A574"
-  adaptive_icon_foreground: "assets/icon/app_icon_foreground.png"
+  adaptive_icon_foreground: "assets/icon/app_icon.png"
 
 flutter:
   uses-material-design: true
   assets:
     - assets/icon/
+    - assets/illustrations/
