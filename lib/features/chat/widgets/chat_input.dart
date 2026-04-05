@@ -66,7 +66,7 @@ class _ChatInputState extends ConsumerState<ChatInput> {
                 ),
                 ModelPicker(
                   selected: model,
-                  onChanged: (m) => ref.read(selectedModelProvider.notifier).state = m,
+                  onChanged: (m) => ref.read(selectedModelProvider.notifier).setModel(m),
                 ),
               ],
             ),

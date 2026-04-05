@@ -51,6 +51,8 @@ class _ToolCardShellState extends State<ToolCardShell> {
         return Icon(widget.icon, size: 16, color: AppColors.textSecondary);
       case ToolStatus.error:
         return const Icon(Icons.error_outline, size: 16, color: AppColors.error);
+      case ToolStatus.unknown:
+        return const Icon(Icons.help_outline, size: 16, color: AppColors.textSecondary);
     }
   }
 

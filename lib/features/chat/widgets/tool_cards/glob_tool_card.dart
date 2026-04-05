@@ -12,10 +12,31 @@ class GlobToolCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final input = toolPart.state.input;
     final pattern = input['pattern'] as String? ?? '';
-    final output = toolPart.state.status == ToolStatus.completed
-        ? toolPart.state.output
-        : null;
-    final files = output is List ? output.cast<String>() : <String>[];
+    final rawOutput = toolPart.state.output;
+    final files = rawOutput is List ? rawOutput.cast<String>() : <String>[];
+    final stringOutput = rawOutput != null && rawOutput is! List ? rawOutput.toString() : null;
+
+    Widget? body;
+    if (files.isNotEmpty) {
+      body = Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: files
+            .take(20)
+            .map((f) => Text(
+                  f,
+                  style: const TextStyle(fontSize: 12, fontFamily: 'monospace'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ))
+            .toList(),
+      );
+    } else if (stringOutput != null && stringOutput.isNotEmpty) {
+      body = Text(stringOutput,
+          style: const TextStyle(fontSize: 12, fontFamily: 'monospace'));
+    } else if (toolPart.state.status == ToolStatus.completed) {
+      body = const Text('No results',
+          style: TextStyle(fontSize: 12, color: AppColors.textSecondary));
+    }
 
     return ToolCardShell(
       icon: Icons.search,
@@ -27,21 +48,7 @@ class GlobToolCard extends StatelessWidget {
                   fontSize: 11, color: AppColors.textSecondary))
           : null,
       status: toolPart.state.status,
-      child: files.isNotEmpty
-          ? Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: files
-                  .take(20)
-                  .map((f) => Text(
-                        f,
-                        style: const TextStyle(
-                            fontSize: 12, fontFamily: 'monospace'),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ))
-                  .toList(),
-            )
-          : null,
+      child: body,
     );
   }
 }

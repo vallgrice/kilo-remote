@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/models/events.dart';
 import '../../../core/models/message.dart';
@@ -10,13 +11,20 @@ import '../../sessions/providers/sessions_provider.dart';
 final sessionNotifierProvider = AsyncNotifierProvider.family<SessionNotifier,
     SessionState, String>(SessionNotifier.new);
 
+/// How many messages to show initially and per "load more" batch.
+const _pageSize = 30;
+
 class SessionState {
+  /// The visible window of messages (last N from the full list).
   final List<StoredMessage> messages;
   final ConnectionState connectionState;
   final bool isStreaming;
   final PermissionRequest? activePermission;
   final QuestionRequest? activeQuestion;
   final String? error;
+
+  /// True when there are older messages that haven't been exposed yet.
+  final bool hasMore;
 
   const SessionState({
     this.messages = const [],
@@ -25,6 +33,7 @@ class SessionState {
     this.activePermission,
     this.activeQuestion,
     this.error,
+    this.hasMore = false,
   });
 
   SessionState copyWith({
@@ -37,6 +46,7 @@ class SessionState {
     bool clearQuestion = false,
     String? error,
     bool clearError = false,
+    bool? hasMore,
   }) {
     return SessionState(
       messages: messages ?? this.messages,
@@ -47,6 +57,7 @@ class SessionState {
       activeQuestion:
           clearQuestion ? null : (activeQuestion ?? this.activeQuestion),
       error: clearError ? null : (error ?? this.error),
+      hasMore: hasMore ?? this.hasMore,
     );
   }
 }
@@ -54,10 +65,16 @@ class SessionState {
 class SessionNotifier extends FamilyAsyncNotifier<SessionState, String> {
   WebSocketTransport? _transport;
 
+  /// How many messages from the tail of the full list are currently visible.
+  int _visibleCount = _pageSize;
+
   @override
   Future<SessionState> build(String arg) async {
     final sessionId = arg;
-    ref.onDispose(() => _transport?.disconnect());
+    ref.onDispose(() {
+      _transport?.reset();
+      _transport?.disconnect();
+    });
 
     final tokenAsync = ref.watch(authProvider);
     final token = tokenAsync.valueOrNull;
@@ -70,6 +87,7 @@ class SessionNotifier extends FamilyAsyncNotifier<SessionState, String> {
       getAuthToken: () => apiClient.getToken(),
       fetchSnapshot: (id) => apiClient.getSessionMessages(id),
       onServiceEvent: _handleServiceEvent,
+      onMessagesChanged: _syncMessages,
       onError: (msg) {
         final current = state.valueOrNull ?? const SessionState();
         state = AsyncData(current.copyWith(error: msg));
@@ -80,25 +98,45 @@ class SessionNotifier extends FamilyAsyncNotifier<SessionState, String> {
       },
     );
 
-    // Listen to reducer changes
-    // We'll poll the reducer messages on each event
+    _transport!.reducer.clear();
+    _visibleCount = _pageSize;
     await _transport!.connect();
 
-    return SessionState(
-      messages: _transport!.reducer.messages,
-      connectionState: _transport!.connectionState,
+    if (_transport == null) return const SessionState();
+
+    return _buildState();
+  }
+
+  /// Slices the tail of the full message list based on [_visibleCount].
+  SessionState _buildState([SessionState? base]) {
+    final all = _transport!.reducer.messages;
+    final total = all.length;
+    final start = max(0, total - _visibleCount);
+    return (base ?? state.valueOrNull ?? const SessionState()).copyWith(
+      messages: start == 0 ? all : all.sublist(start),
+      hasMore: start > 0,
     );
+  }
+
+  /// Expose the next page of older messages.
+  void loadMore() {
+    final all = _transport?.reducer.messages;
+    if (all == null) return;
+    if (_visibleCount >= all.length) return; // nothing to load
+    _visibleCount = min(_visibleCount + _pageSize, all.length);
+    state = AsyncData(_buildState());
   }
 
   void _handleServiceEvent(ServiceEvent event) {
     final current = state.valueOrNull ?? const SessionState();
+    // When new messages arrive via events, keep the window anchored to the tail.
+    _visibleCount = max(_visibleCount, _pageSize);
     switch (event) {
       case SessionStatusEvent(:final status):
         final type = status['type'] as String?;
-        state = AsyncData(current.copyWith(
+        state = AsyncData(_buildState(current.copyWith(
           isStreaming: type == 'busy',
-          messages: _transport!.reducer.messages,
-        ));
+        )));
       case PermissionAskedEvent(
           :final requestId,
           :final permission,
@@ -106,7 +144,7 @@ class SessionNotifier extends FamilyAsyncNotifier<SessionState, String> {
           :final metadata,
           :final always,
         ):
-        state = AsyncData(current.copyWith(
+        state = AsyncData(_buildState(current.copyWith(
           activePermission: PermissionRequest(
             requestId: requestId,
             permission: permission,
@@ -114,17 +152,15 @@ class SessionNotifier extends FamilyAsyncNotifier<SessionState, String> {
             metadata: metadata,
             always: always,
           ),
-          messages: _transport!.reducer.messages,
-        ));
+        )));
       case PermissionRepliedEvent(:final requestId):
         if (current.activePermission?.requestId == requestId) {
-          state = AsyncData(current.copyWith(
+          state = AsyncData(_buildState(current.copyWith(
             clearPermission: true,
-            messages: _transport!.reducer.messages,
-          ));
+          )));
         }
       case QuestionAskedEvent(:final requestId, :final questions):
-        state = AsyncData(current.copyWith(
+        state = AsyncData(_buildState(current.copyWith(
           activeQuestion: QuestionRequest(
             requestId: requestId,
             questions: questions
@@ -132,39 +168,33 @@ class SessionNotifier extends FamilyAsyncNotifier<SessionState, String> {
                     .toList() ??
                 [],
           ),
-          messages: _transport!.reducer.messages,
-        ));
+        )));
       case QuestionRepliedEvent(:final requestId):
         if (current.activeQuestion?.requestId == requestId) {
-          state = AsyncData(current.copyWith(
+          state = AsyncData(_buildState(current.copyWith(
             clearQuestion: true,
-            messages: _transport!.reducer.messages,
-          ));
+          )));
         }
       case StoppedEvent(:final reason):
-        state = AsyncData(current.copyWith(
+        state = AsyncData(_buildState(current.copyWith(
           isStreaming: false,
-          messages: _transport!.reducer.messages,
           error: reason == 'disconnected' ? 'CLI disconnected' : null,
-        ));
+        )));
       case SessionErrorEvent(:final error):
-        state = AsyncData(current.copyWith(
-          error: error,
-          messages: _transport!.reducer.messages,
-        ));
+        state = AsyncData(_buildState(current.copyWith(error: error)));
       case SessionCreatedEvent():
-        state = AsyncData(current.copyWith(
-          messages: _transport!.reducer.messages,
-        ));
+        state = AsyncData(_buildState());
     }
   }
 
-  /// Call this after reducer processes a ChatEvent to sync messages.
   void _syncMessages() {
-    final current = state.valueOrNull ?? const SessionState();
-    state = AsyncData(current.copyWith(
-      messages: _transport!.reducer.messages,
-    ));
+    // New live message arrived — always include it (expand window if needed).
+    final all = _transport?.reducer.messages;
+    if (all != null && _visibleCount < all.length) {
+      // A new message appeared at the tail; grow the window to include it.
+      _visibleCount = _visibleCount + (all.length - _visibleCount);
+    }
+    state = AsyncData(_buildState());
   }
 
   Future<void> sendMessage(String text, {String? mode, String? model}) async {

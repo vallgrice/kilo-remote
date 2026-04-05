@@ -30,7 +30,11 @@ class EventNormalizer {
       case 'message.part.updated':
         final rawPart = data['part'] as Map<String, dynamic>?;
         if (rawPart == null) return null;
-        return ChatEvent.partUpdated(part: Part.fromJson(rawPart));
+        try {
+          return ChatEvent.partUpdated(part: Part.fromJson(rawPart));
+        } catch (_) {
+          return null; // Skip unknown part types
+        }
 
       case 'message.part.delta':
         final sessionID = data['sessionID'] as String?;

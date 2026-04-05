@@ -9,13 +9,24 @@ class ModelPicker extends ConsumerWidget {
 
   const ModelPicker({super.key, this.selected, required this.onChanged});
 
-  String _shortName(String? name) {
-    if (name == null || name.isEmpty) return 'Model';
-    final idx = name.indexOf(':');
-    if (idx >= 0 && idx + 1 < name.length) {
-      return name.substring(idx + 1).trim();
+  String _shortName(String? id, String? name) {
+    if (id == null || id.isEmpty) return 'Model';
+    
+    // Handle coding plan providers: zai-coding/glm-4.7 -> GLM-4.7
+    // Handle other providers with slashes: provider/model -> model
+    final slashIdx = id.indexOf('/');
+    if (slashIdx >= 0 && slashIdx + 1 < id.length) {
+      return id.substring(slashIdx + 1);
     }
-    return name;
+    
+    // Handle OpenRouter models: provider:model -> model
+    if (name != null && name.isNotEmpty) {
+      final idx = name.indexOf(':');
+      if (idx >= 0 && idx + 1 < name.length) {
+        return name.substring(idx + 1).trim();
+      }
+    }
+    return id;
   }
 
   void _openSheet(BuildContext context, List<Map<String, dynamic>> models) {
@@ -54,7 +65,7 @@ class ModelPicker extends ConsumerWidget {
         String? selectedName;
         if (selected != null) {
           final match = models.where((m) => m['id']?.toString() == selected).firstOrNull;
-          selectedName = _shortName(match?['name']?.toString() ?? selected);
+          selectedName = _shortName(selected, match?['name']?.toString());
         }
 
         return GestureDetector(
@@ -135,12 +146,32 @@ class _ModelPickerSheetState extends State<_ModelPickerSheet> {
 
   String _providerLabel(String provider) {
     switch (provider) {
+      case 'zai-coding':
+        return 'Z.AI CODING';
+      case 'kimi-coding':
+        return 'KIMI CODING';
+      case 'byteplus-coding':
+        return 'BYTEPLUS CODING';
       case 'anthropic':
         return 'ANTHROPIC';
       case 'openai':
         return 'OPENAI';
       case 'kilo-auto':
         return 'KILO AUTO';
+      case 'google':
+        return 'GOOGLE';
+      case 'mistral':
+        return 'MISTRAL';
+      case 'cohere':
+        return 'COHERE';
+      case 'minimax':
+        return 'MINIMAX';
+      case 'xai':
+        return 'XAI';
+      case 'bedrock':
+        return 'AWS BEDROCK';
+      case 'inception':
+        return 'INCEPTION';
       default:
         return provider.toUpperCase();
     }

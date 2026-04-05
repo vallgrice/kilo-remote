@@ -20,6 +20,7 @@ ToolState _$ToolStateFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$ToolState {
+  @JsonKey(unknownEnumValue: ToolStatus.unknown)
   ToolStatus get status => throw _privateConstructorUsedError;
   Map<String, dynamic> get input => throw _privateConstructorUsedError;
   dynamic get output => throw _privateConstructorUsedError;
@@ -41,7 +42,7 @@ abstract class $ToolStateCopyWith<$Res> {
       _$ToolStateCopyWithImpl<$Res, ToolState>;
   @useResult
   $Res call(
-      {ToolStatus status,
+      {@JsonKey(unknownEnumValue: ToolStatus.unknown) ToolStatus status,
       Map<String, dynamic> input,
       dynamic output,
       String? error});
@@ -97,7 +98,7 @@ abstract class _$$ToolStateImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {ToolStatus status,
+      {@JsonKey(unknownEnumValue: ToolStatus.unknown) ToolStatus status,
       Map<String, dynamic> input,
       dynamic output,
       String? error});
@@ -146,7 +147,7 @@ class __$$ToolStateImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$ToolStateImpl implements _ToolState {
   const _$ToolStateImpl(
-      {required this.status,
+      {@JsonKey(unknownEnumValue: ToolStatus.unknown) required this.status,
       final Map<String, dynamic> input = const {},
       this.output,
       this.error})
@@ -156,6 +157,7 @@ class _$ToolStateImpl implements _ToolState {
       _$$ToolStateImplFromJson(json);
 
   @override
+  @JsonKey(unknownEnumValue: ToolStatus.unknown)
   final ToolStatus status;
   final Map<String, dynamic> _input;
   @override
@@ -214,7 +216,8 @@ class _$ToolStateImpl implements _ToolState {
 
 abstract class _ToolState implements ToolState {
   const factory _ToolState(
-      {required final ToolStatus status,
+      {@JsonKey(unknownEnumValue: ToolStatus.unknown)
+      required final ToolStatus status,
       final Map<String, dynamic> input,
       final dynamic output,
       final String? error}) = _$ToolStateImpl;
@@ -223,6 +226,7 @@ abstract class _ToolState implements ToolState {
       _$ToolStateImpl.fromJson;
 
   @override
+  @JsonKey(unknownEnumValue: ToolStatus.unknown)
   ToolStatus get status;
   @override
   Map<String, dynamic> get input;

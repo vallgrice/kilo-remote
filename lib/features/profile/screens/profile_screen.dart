@@ -30,20 +30,20 @@ class ProfileScreen extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            _buildUserProfileSection(userProfileAsync),
+            _buildUserProfileSection(context, userProfileAsync),
             const SizedBox(height: 24),
-            _buildBalanceSection(balanceAsync),
+            _buildBalanceSection(context, balanceAsync),
             const SizedBox(height: 24),
-            _buildUsageStatsSection(ref, selectedPeriod, usageAsync),
+            _buildUsageStatsSection(context, ref, selectedPeriod, usageAsync),
             const SizedBox(height: 24),
-            _buildCalendarSection(ref, selectedPeriod, usagePeriodsAsync),
+            _buildCalendarSection(context, ref, selectedPeriod, usagePeriodsAsync),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildUserProfileSection(AsyncValue<UserProfile> userProfileAsync) {
+  Widget _buildUserProfileSection(BuildContext context, AsyncValue<UserProfile> userProfileAsync) {
     return userProfileAsync.when(
       loading: () => _buildCard(
         child: const Center(child: CircularProgressIndicator()),
@@ -114,7 +114,7 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildBalanceSection(AsyncValue<UserBalance> balanceAsync) {
+  Widget _buildBalanceSection(BuildContext context, AsyncValue<UserBalance> balanceAsync) {
     return balanceAsync.when(
       loading: () => _buildCard(
         child: const Center(child: CircularProgressIndicator()),
@@ -168,6 +168,7 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   Widget _buildUsageStatsSection(
+    BuildContext context,
     WidgetRef ref,
     UsagePeriodType selectedPeriod,
     AsyncValue<UsageStats> usageAsync,
@@ -215,6 +216,7 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   Widget _buildCalendarSection(
+    BuildContext context,
     WidgetRef ref,
     UsagePeriodType selectedPeriod,
     AsyncValue<List<UsagePeriod>> usagePeriodsAsync,

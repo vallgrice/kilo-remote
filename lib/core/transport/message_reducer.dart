@@ -4,10 +4,12 @@ import '../models/part.dart';
 import '../models/session.dart';
 
 class MessageReducer {
-  final List<StoredMessage> _messages = [];
+  List<StoredMessage> _messages = [];
   final Map<String, int> _messageIndex = {};
+  List<StoredMessage>? _cachedMessages;
 
-  List<StoredMessage> get messages => List.unmodifiable(_messages);
+  /// Returns current messages. The returned list must not be mutated.
+  List<StoredMessage> get messages => _cachedMessages ??= List.unmodifiable(_messages);
 
   void onEvent(ChatEvent event) {
     switch (event) {
@@ -23,8 +25,9 @@ class MessageReducer {
   }
 
   void replaySnapshot(SessionInfo info, List<StoredMessage> messages) {
-    _messages.clear();
+    _messages = [];
     _messageIndex.clear();
+    _cachedMessages = null;
     for (final msg in messages) {
       _messageIndex[msg.info.id] = _messages.length;
       _messages.add(msg);
@@ -32,11 +35,13 @@ class MessageReducer {
   }
 
   void clear() {
-    _messages.clear();
+    _messages = [];
     _messageIndex.clear();
+    _cachedMessages = null;
   }
 
   void _upsertMessage(MessageInfo info) {
+    _cachedMessages = null;
     final idx = _messageIndex[info.id];
     if (idx != null) {
       _messages[idx] = _messages[idx].copyWith(info: info);
@@ -47,6 +52,7 @@ class MessageReducer {
   }
 
   void _upsertPart(Part part) {
+    _cachedMessages = null;
     final msgId = part.messageID;
     final idx = _messageIndex[msgId];
     if (idx == null) return;
@@ -62,6 +68,7 @@ class MessageReducer {
   }
 
   void _applyDelta(String messageId, String partId, String field, String delta) {
+    _cachedMessages = null;
     final idx = _messageIndex[messageId];
     if (idx == null) return;
     final msg = _messages[idx];
@@ -84,6 +91,7 @@ class MessageReducer {
   }
 
   void _removePart(String messageId, String partId) {
+    _cachedMessages = null;
     final idx = _messageIndex[messageId];
     if (idx == null) return;
     final msg = _messages[idx];

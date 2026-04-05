@@ -12,16 +12,17 @@ class GrepToolCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final input = toolPart.state.input;
     final pattern = input['pattern'] as String? ?? '';
-    final output = toolPart.state.status == ToolStatus.completed
-        ? toolPart.state.output?.toString()
-        : null;
+    final rawOutput = toolPart.state.output;
+    final output = rawOutput?.toString();
+    final hasOutput = output != null && output.isNotEmpty;
 
     return ToolCardShell(
       icon: Icons.manage_search,
       title: 'Grep',
       subtitle: pattern,
       status: toolPart.state.status,
-      child: output != null && output.isNotEmpty
+      defaultExpanded: false,
+      child: hasOutput
           ? Container(
               width: double.infinity,
               constraints: const BoxConstraints(maxHeight: 200),
@@ -36,7 +37,10 @@ class GrepToolCard extends StatelessWidget {
                         fontSize: 12, fontFamily: 'monospace')),
               ),
             )
-          : null,
+          : toolPart.state.status == ToolStatus.completed
+              ? const Text('No results',
+                  style: TextStyle(fontSize: 12, color: AppColors.textSecondary))
+              : null,
     );
   }
 }

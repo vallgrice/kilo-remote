@@ -40,7 +40,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: 'device',
             builder: (context, state) => const DeviceAuthScreen(),
           ),
-        ),
+        ],
       ),
       ShellRoute(
         navigatorKey: _shellNavigatorKey,

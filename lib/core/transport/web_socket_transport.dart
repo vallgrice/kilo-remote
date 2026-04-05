@@ -21,6 +21,7 @@ class WebSocketTransport {
   final SnapshotFetcher? _fetchSnapshot;
   final MessageReducer reducer;
   final void Function(ServiceEvent)? onServiceEvent;
+  final void Function()? onMessagesChanged;
   final void Function(String)? onError;
   final void Function(ConnectionState)? onConnectionStateChanged;
 
@@ -46,6 +47,7 @@ class WebSocketTransport {
     SnapshotFetcher? fetchSnapshot,
     MessageReducer? reducer,
     this.onServiceEvent,
+    this.onMessagesChanged,
     this.onError,
     this.onConnectionStateChanged,
   })  : _sessionId = sessionId,
@@ -77,7 +79,7 @@ class WebSocketTransport {
         final snapshot = await _fetchSnapshot(_sessionId);
         if (gen != _generation) return;
         reducer.replaySnapshot(snapshot.info, snapshot.messages);
-      } catch (e) {
+      } catch (_) {
         // Non-fatal — still connect for live events
       }
     }
@@ -164,6 +166,7 @@ class WebSocketTransport {
 
     if (normalized is ChatEvent) {
       reducer.onEvent(normalized);
+      onMessagesChanged?.call();
     } else if (normalized is ServiceEvent) {
       onServiceEvent?.call(normalized);
     }
@@ -296,6 +299,12 @@ class WebSocketTransport {
     _setConnectionState(ConnectionState.disconnected);
   }
 
+  void reset() {
+    reducer.clear();
+    _sessionStopped = false;
+    _ownerConnectionId = null;
+  }
+
   void _cleanup() {
     _reconnectTimer?.cancel();
     _reconnectTimer = null;
@@ -325,17 +334,23 @@ class WebSocketTransport {
       _maxReconnectDelay.inMilliseconds,
     );
 
-    _reconnectTimer = Timer(Duration(milliseconds: delayMs), () {
+    _reconnectTimer = Timer(Duration(milliseconds: delayMs), () async {
       if (expectedGen != _generation) return;
-      _openWebSocket(expectedGen);
 
-      // Replay snapshot on reconnect
+      // Replay snapshot BEFORE opening WebSocket to avoid race conditions
       if (_fetchSnapshot != null) {
-        _fetchSnapshot(_sessionId).then((snapshot) {
+        try {
+          final snapshot = await _fetchSnapshot(_sessionId);
           if (expectedGen != _generation) return;
           reducer.replaySnapshot(snapshot.info, snapshot.messages);
-        }).catchError((_) {});
+          onMessagesChanged?.call();
+        } catch (_) {
+          // Non-fatal — still reconnect for live events
+        }
       }
+
+      if (expectedGen != _generation) return;
+      _openWebSocket(expectedGen);
     });
   }
 

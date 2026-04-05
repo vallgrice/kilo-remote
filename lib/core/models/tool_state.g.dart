@@ -8,7 +8,8 @@ part of 'tool_state.dart';
 
 _$ToolStateImpl _$$ToolStateImplFromJson(Map<String, dynamic> json) =>
     _$ToolStateImpl(
-      status: $enumDecode(_$ToolStatusEnumMap, json['status']),
+      status: $enumDecode(_$ToolStatusEnumMap, json['status'],
+          unknownValue: ToolStatus.unknown),
       input: json['input'] as Map<String, dynamic>? ?? const {},
       output: json['output'],
       error: json['error'] as String?,
@@ -27,4 +28,5 @@ const _$ToolStatusEnumMap = {
   ToolStatus.running: 'running',
   ToolStatus.completed: 'completed',
   ToolStatus.error: 'error',
+  ToolStatus.unknown: 'unknown',
 };
