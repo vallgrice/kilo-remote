@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../providers/user_profile_provider.dart';
 import '../data/user_repository.dart';
 import '../../../core/models/usage_stats.dart';
@@ -58,6 +59,8 @@ class ProfileScreen extends ConsumerWidget {
             _buildUsageStatsSection(context, ref, selectedPeriod, usageAsync),
             const SizedBox(height: 24),
             _buildCalendarSection(context, ref, selectedPeriod, usagePeriodsAsync),
+            const SizedBox(height: 24),
+            _buildApiKeysSection(context),
           ],
         ),
       ),
@@ -591,6 +594,55 @@ class ProfileScreen extends ConsumerWidget {
         border: Border.all(color: AppColors.border),
       ),
       child: child,
+    );
+  }
+
+  Widget _buildApiKeysSection(BuildContext context) {
+    return _buildCard(
+      child: InkWell(
+        onTap: () => context.go('/api-keys'),
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(Icons.key, size: 20, color: AppColors.primary),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'API Keys',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      'Manage your BYOK keys',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right, size: 20, color: AppColors.textSecondary),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

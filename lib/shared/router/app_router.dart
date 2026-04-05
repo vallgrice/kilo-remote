@@ -7,6 +7,7 @@ import '../../features/auth/screens/device_auth_screen.dart';
 import '../../features/sessions/screens/sessions_screen.dart';
 import '../../features/chat/screens/chat_screen.dart';
 import '../../features/profile/screens/profile_screen.dart';
+import '../../features/byok/screens/api_keys_screen.dart';
 import '../../features/auth/providers/auth_provider.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -47,6 +48,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/profile',
         builder: (context, state) => const ProfileScreen(),
+      ),
+      GoRoute(
+        path: '/api-keys',
+        builder: (context, state) => const ApiKeysScreen(),
       ),
       GoRoute(
         path: '/chat/:sessionId',

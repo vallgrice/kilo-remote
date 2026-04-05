@@ -9,4 +9,11 @@ abstract final class ApiConstants {
   static const profileUsage = '/api/profile/usage';
   static const profileBalance = '/api/profile/balance';
   static const profileMe = '/api/profile';
+  static const byokList = '/api/trpc/byok.list';
+  static const byokCreate = '/api/trpc/byok.create';
+  static const byokUpdate = '/api/trpc/byok.update';
+  static const byokDelete = '/api/trpc/byok.delete';
+  static const byokSetEnabled = '/api/trpc/byok.setEnabled';
+  static const byokTestApiKey = '/api/trpc/byok.testApiKey';
+  static const byokSupportedModels = '/api/trpc/byok.listSupportedModels';
 }
