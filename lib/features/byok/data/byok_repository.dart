@@ -21,10 +21,10 @@ class ByokRepository {
     final token = await _getToken();
     if (token == null) throw Exception('Not authenticated');
 
-    final input = '{}';
-    final response = await _dio.post(
+    final input = '{"0":{}}';
+    final response = await _dio.get(
       ApiConstants.byokList,
-      data: {'batch': '1', 'input': input},
+      queryParameters: {'batch': '1', 'input': input},
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
 
@@ -43,10 +43,10 @@ class ByokRepository {
     final token = await _getToken();
     if (token == null) throw Exception('Not authenticated');
 
-    final input = '{}';
-    final response = await _dio.post(
+    final input = '{"0":{}}';
+    final response = await _dio.get(
       ApiConstants.byokSupportedModels,
-      data: {'batch': '1', 'input': input},
+      queryParameters: {'batch': '1', 'input': input},
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
 

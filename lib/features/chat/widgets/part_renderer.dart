@@ -25,29 +25,42 @@ class PartRenderer extends StatelessWidget {
   Widget build(BuildContext context) {
     return switch (part) {
       TextPart(:final text) => text.isNotEmpty
-          ? MarkdownBody(
-              data: text,
-              styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
-                p: TextStyle(fontSize: 14, height: 1.5, color: isUserMessage ? AppColors.onPrimary : AppColors.textPrimary),
-                h1: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isUserMessage ? AppColors.onPrimary : AppColors.textPrimary),
-                h2: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: isUserMessage ? AppColors.onPrimary : AppColors.textPrimary),
-                h3: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: isUserMessage ? AppColors.onPrimary : AppColors.textPrimary),
-                em: TextStyle(fontStyle: FontStyle.italic, color: isUserMessage ? AppColors.onPrimary : AppColors.textPrimary),
-                strong: TextStyle(fontWeight: FontWeight.bold, color: isUserMessage ? AppColors.onPrimary : AppColors.textPrimary),
-                code: TextStyle(
-                  fontSize: 13,
-                  fontFamily: 'monospace',
-                  backgroundColor: isUserMessage ? AppColors.onPrimary.withOpacity(0.15) : AppColors.codeBackground,
-                  color: isUserMessage ? AppColors.onPrimary : null,
+          ? Theme(
+              data: Theme.of(context).copyWith(
+                textTheme: Theme.of(context).textTheme.apply(
+                  bodyColor: isUserMessage ? AppColors.onPrimary : AppColors.textPrimary,
+                  decorationColor: isUserMessage ? AppColors.onPrimary : AppColors.primary,
                 ),
-                codeblockDecoration: BoxDecoration(
-                  color: isUserMessage ? AppColors.onPrimary.withOpacity(0.15) : AppColors.codeBackground,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                a: TextStyle(color: isUserMessage ? AppColors.onPrimary : AppColors.primary, decoration: TextDecoration.underline),
-                listBullet: TextStyle(color: isUserMessage ? AppColors.onPrimary : AppColors.textPrimary),
               ),
-              selectable: true,
+              child: MarkdownBody(
+                data: text,
+                styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
+                  p: TextStyle(fontSize: 14, height: 1.5, color: isUserMessage ? AppColors.onPrimary : AppColors.textPrimary),
+                  h1: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isUserMessage ? AppColors.onPrimary : AppColors.textPrimary),
+                  h2: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: isUserMessage ? AppColors.onPrimary : AppColors.textPrimary),
+                  h3: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: isUserMessage ? AppColors.onPrimary : AppColors.textPrimary),
+                  em: TextStyle(fontStyle: FontStyle.italic, color: isUserMessage ? AppColors.onPrimary : AppColors.textPrimary),
+                  strong: TextStyle(fontWeight: FontWeight.bold, color: isUserMessage ? AppColors.onPrimary : AppColors.textPrimary),
+                  code: TextStyle(
+                    fontSize: 13,
+                    fontFamily: 'monospace',
+                    backgroundColor: isUserMessage ? AppColors.onPrimary.withOpacity(0.15) : AppColors.codeBackground,
+                    color: isUserMessage ? AppColors.onPrimary : null,
+                  ),
+                  codeblockDecoration: BoxDecoration(
+                    color: isUserMessage ? AppColors.onPrimary.withOpacity(0.15) : AppColors.codeBackground,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  a: TextStyle(color: isUserMessage ? AppColors.onPrimary : AppColors.primary, decoration: TextDecoration.underline),
+                  listBullet: TextStyle(color: isUserMessage ? AppColors.onPrimary : AppColors.textPrimary),
+                  blockquote: TextStyle(color: isUserMessage ? AppColors.onPrimary : AppColors.textPrimary),
+                  blockquoteDecoration: BoxDecoration(
+                    color: isUserMessage ? AppColors.onPrimary.withOpacity(0.1) : AppColors.surfaceElevated,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                selectable: true,
+              ),
             )
           : const SizedBox.shrink(),
       ToolPart() => _toolCard(part as ToolPart),

@@ -14,7 +14,6 @@ class ProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userProfileAsync = ref.watch(userProfileProvider);
-    final balanceAsync = ref.watch(userBalanceProvider);
     final selectedPeriod = ref.watch(selectedUsagePeriodProvider);
     final usageAsync = ref.watch(currentUsageStatsProvider);
     final usagePeriodsAsync = ref.watch(usagePeriodsProvider((period: selectedPeriod, groupByModel: false)));
@@ -45,7 +44,6 @@ class ProfileScreen extends ConsumerWidget {
         color: AppColors.primary,
         onRefresh: () async {
           ref.invalidate(userProfileProvider);
-          ref.invalidate(userBalanceProvider);
           ref.invalidate(currentUsageStatsProvider);
           ref.invalidate(usagePeriodsProvider((period: selectedPeriod, groupByModel: false)));
         },
@@ -53,8 +51,6 @@ class ProfileScreen extends ConsumerWidget {
           padding: const EdgeInsets.all(16),
           children: [
             _buildUserProfileSection(context, userProfileAsync),
-            const SizedBox(height: 24),
-            _buildBalanceSection(context, balanceAsync),
             const SizedBox(height: 24),
             _buildUsageStatsSection(context, ref, selectedPeriod, usageAsync),
             const SizedBox(height: 24),
@@ -133,59 +129,6 @@ class ProfileScreen extends ConsumerWidget {
               ),
             ),
           ],
-        );
-      },
-    );
-  }
-
-  Widget _buildBalanceSection(BuildContext context, AsyncValue<UserBalance> balanceAsync) {
-    return balanceAsync.when(
-      loading: () => _buildCard(
-        child: const Center(child: CircularProgressIndicator()),
-      ),
-      error: (e, _) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          showAppSnackbar(
-            context,
-            message: 'Failed to load balance: $e',
-            type: SnackbarType.error,
-          );
-        });
-        return _buildCard(
-          child: EmptyState(
-            type: EmptyStateType.usage,
-            customTitle: 'Failed to load balance',
-            useIllustration: true,
-          ),
-        );
-      },
-      data: (balance) {
-        return _buildCard(
-          child: Row(
-            children: [
-              Text(
-                '\$${balance.balance.toStringAsFixed(2)}',
-                style: TextStyle(
-                  color: balance.isDepleted ? AppColors.error : AppColors.success,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(width: 12),
-              if (balance.isDepleted)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: AppColors.error.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: const Text(
-                    'Depleted',
-                    style: TextStyle(color: AppColors.error, fontSize: 12),
-                  ),
-                ),
-            ],
-          ),
         );
       },
     );
