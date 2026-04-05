@@ -5,6 +5,7 @@ import '../providers/sessions_provider.dart';
 import '../widgets/session_card.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../../shared/theme/app_colors.dart';
+import '../../../shared/widgets/app_icon.dart';
 
 class SessionsScreen extends ConsumerWidget {
   const SessionsScreen({super.key});
@@ -15,22 +16,38 @@ class SessionsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Kilo Remote'),
+        title: Row(
+          children: [
+            const AppIcon(size: 32),
+            const SizedBox(width: 12),
+            const Text('Sessions', style: TextStyle(fontWeight: FontWeight.w600)),
+          ],
+        ),
         actions: [
-          IconButton(
-            onPressed: () async {
-              await ref.read(authProvider.notifier).signOut();
-              if (context.mounted) context.go('/login');
-            },
-            icon: const Icon(Icons.logout),
-            tooltip: 'Sign out',
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: IconButton(
+              onPressed: () async {
+                await ref.read(authProvider.notifier).signOut();
+                if (context.mounted) context.go('/login');
+              },
+              icon: const Icon(Icons.logout, size: 20),
+              tooltip: 'Sign out',
+            ),
           ),
         ],
       ),
       body: RefreshIndicator(
+        color: AppColors.primary,
         onRefresh: () => ref.read(activeSessionsProvider.notifier).refresh(),
         child: sessionsAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => Center(
+            child: CircularProgressIndicator(color: AppColors.primary),
+          ),
           error: (e, _) => Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -51,13 +68,13 @@ class SessionsScreen extends ConsumerWidget {
                 children: [
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 0.7,
-                    child: const Center(
+                    child: Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.terminal, size: 48, color: AppColors.textSecondary),
-                          SizedBox(height: 16),
-                          Text(
+                          const AppIcon(size: 48),
+                          const SizedBox(height: 16),
+                          const Text(
                             'No active sessions',
                             style: TextStyle(
                               color: AppColors.textPrimary,
@@ -65,8 +82,8 @@ class SessionsScreen extends ConsumerWidget {
                               fontWeight: FontWeight.w600,
                             ),
                           ),
-                          SizedBox(height: 8),
-                          Text(
+                          const SizedBox(height: 8),
+                          const Text(
                             'Start a CLI session with kilo --remote',
                             style: TextStyle(
                               color: AppColors.textSecondary,
