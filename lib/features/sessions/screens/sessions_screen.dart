@@ -6,6 +6,8 @@ import '../widgets/session_card.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/widgets/app_icon.dart';
+import '../../../shared/widgets/empty_state.dart';
+import '../../../shared/utils/snackbar_utils.dart';
 
 class SessionsScreen extends ConsumerWidget {
   const SessionsScreen({super.key});
@@ -31,6 +33,18 @@ class SessionsScreen extends ConsumerWidget {
               borderRadius: BorderRadius.circular(8),
             ),
             child: IconButton(
+              onPressed: () => context.go('/profile'),
+              icon: const Icon(Icons.person_outline, size: 20),
+              tooltip: 'Profile',
+            ),
+          ),
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: IconButton(
               onPressed: () async {
                 await ref.read(authProvider.notifier).signOut();
                 if (context.mounted) context.go('/login');
@@ -48,53 +62,30 @@ class SessionsScreen extends ConsumerWidget {
           loading: () => Center(
             child: CircularProgressIndicator(color: AppColors.primary),
           ),
-          error: (e, _) => Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('Error: $e', style: const TextStyle(color: AppColors.error)),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () =>
-                      ref.read(activeSessionsProvider.notifier).refresh(),
-                  child: const Text('Retry'),
-                ),
-              ],
-            ),
-          ),
+          error: (e, _) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              showAppSnackbar(
+                context,
+                message: 'Failed to load sessions: $e',
+                type: SnackbarType.error,
+                actionLabel: 'Retry',
+                onAction: () => ref.read(activeSessionsProvider.notifier).refresh(),
+              );
+            });
+            return EmptyState(
+              type: EmptyStateType.sessions,
+              customTitle: 'Failed to load',
+              customSubtitle: 'Pull to refresh',
+              onAction: () => ref.read(activeSessionsProvider.notifier).refresh(),
+              actionLabel: 'Retry',
+            );
+          },
           data: (sessions) {
             if (sessions.isEmpty) {
-              return ListView(
-                children: [
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.7,
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const AppIcon(size: 48),
-                          const SizedBox(height: 16),
-                          const Text(
-                            'No active sessions',
-                            style: TextStyle(
-                              color: AppColors.textPrimary,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          const Text(
-                            'Start a CLI session with kilo --remote',
-                            style: TextStyle(
-                              color: AppColors.textSecondary,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
+              return EmptyState(
+                type: EmptyStateType.sessions,
+                onAction: () {},
+                actionLabel: 'Learn more',
               );
             }
             return ListView.builder(
