@@ -168,4 +168,4 @@ dio.post(endpoint, data: {
 
 ## License
 
-Private - All rights reserved
+See [LICENSE](LICENSE) for details.
