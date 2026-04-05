@@ -169,3 +169,13 @@ dio.post(endpoint, data: {
 ## License
 
 MIT License - See [LICENSE](LICENSE) for details.
+
+## Relationship to KiloCode
+
+Kilo Remote is a mobile client that maintains compatibility with KiloCode's session management and tool interfaces, but operates as a completely isolated mobile application:
+
+- Works with KiloCode backend via tRPC and WebSocket APIs
+- Separate mobile-specific UI and UX
+- No shared state or configuration with desktop KiloCode
+
+This project is a remote mobile client for [KiloCode](https://github.com/Kilo-Org/kilocode).
