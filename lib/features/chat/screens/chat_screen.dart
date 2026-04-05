@@ -9,6 +9,8 @@ import '../widgets/permission_card.dart';
 import '../widgets/question_card.dart';
 import '../../../core/transport/web_socket_transport.dart' as transport;
 import '../../../shared/theme/app_colors.dart';
+import '../../../shared/widgets/empty_state.dart';
+import '../../../shared/utils/snackbar_utils.dart';
 import '../../sessions/providers/sessions_provider.dart';
 
 class ChatScreen extends ConsumerWidget {
@@ -27,14 +29,39 @@ class ChatScreen extends ConsumerWidget {
         appBar: _buildAppBar(context, null, false, sessionMeta),
         body: Center(child: CircularProgressIndicator(color: AppColors.primary)),
       ),
-      error: (e, _) => Scaffold(
-        appBar: _buildAppBar(context, null, false, sessionMeta),
-        body: Center(child: Text('Error: $e', style: const TextStyle(color: AppColors.error))),
-      ),
+      error: (e, _) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          showAppSnackbar(
+            context,
+            message: 'Connection error: $e',
+            type: SnackbarType.error,
+          );
+        });
+        return Scaffold(
+          appBar: _buildAppBar(context, null, false, sessionMeta),
+          body: EmptyState(
+            type: EmptyStateType.chat,
+            customTitle: 'Connection error',
+            customSubtitle: 'Pull to reconnect',
+          ),
+        );
+      },
       data: (state) {
         final notifier = ref.read(sessionNotifierProvider(sessionId).notifier);
         final isConnected = state.connectionState == transport.ConnectionState.connected;
         final canSend = isConnected && !state.isStreaming;
+
+        if (state.error != null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            showAppSnackbar(
+              context,
+              message: state.error!,
+              type: SnackbarType.error,
+              actionLabel: 'Dismiss',
+              onAction: () => notifier.clearError(),
+            );
+          });
+        }
 
         return Scaffold(
           appBar: _buildAppBar(context, state, isConnected, sessionMeta,
