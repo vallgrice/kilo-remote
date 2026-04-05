@@ -50,13 +50,12 @@ class _ChatInputState extends ConsumerState<ChatInput> {
       padding: const EdgeInsets.all(12),
       decoration: const BoxDecoration(
         color: AppColors.surface,
-        border: Border(top: BorderSide(color: AppColors.border)),
+        border: Border(top: BorderSide(color: AppColors.border, width: 0.5)),
       ),
       child: SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Toolbar
             Row(
               children: [
                 Expanded(
@@ -72,7 +71,6 @@ class _ChatInputState extends ConsumerState<ChatInput> {
               ],
             ),
             const SizedBox(height: 8),
-            // Input row
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -91,15 +89,38 @@ class _ChatInputState extends ConsumerState<ChatInput> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                IconButton.filled(
-                  onPressed: widget.canSend && !_isSending ? _send : null,
-                  icon: _isSending
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                        )
-                      : const Icon(Icons.send, size: 20),
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    gradient: widget.canSend && !_isSending
+                        ? const LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [AppColors.primary, AppColors.primaryDark],
+                          )
+                        : null,
+                    color: widget.canSend && !_isSending ? null : AppColors.surfaceElevated,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: IconButton(
+                    onPressed: widget.canSend && !_isSending ? _send : null,
+                    padding: EdgeInsets.zero,
+                    icon: _isSending
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.onPrimary,
+                            ),
+                          )
+                        : Icon(
+                            Icons.arrow_upward,
+                            size: 20,
+                            color: widget.canSend ? AppColors.onPrimary : AppColors.textSecondary,
+                          ),
+                  ),
                 ),
               ],
             ),
