@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import '../providers/user_profile_provider.dart';
 import '../data/user_repository.dart';
 import '../../../core/models/usage_stats.dart';
@@ -20,27 +19,6 @@ class ProfileScreen extends ConsumerWidget {
     final usagePeriodsAsync = ref.watch(usagePeriodsProvider((period: selectedPeriod, groupByModel: false)));
 
     return Scaffold(
-      appBar: AppBar(
-        leading: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Material(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(8),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(8),
-              onTap: () => context.go('/sessions'),
-              child: const Icon(Icons.arrow_back, size: 20),
-            ),
-          ),
-        ),
-        title: const Row(
-          children: [
-            Icon(Icons.person_outline, size: 24),
-            SizedBox(width: 12),
-            Text('Profile', style: TextStyle(fontWeight: FontWeight.w600)),
-          ],
-        ),
-      ),
       body: RefreshIndicator(
         color: AppColors.primary,
         onRefresh: () async {
@@ -81,6 +59,7 @@ class ProfileScreen extends ConsumerWidget {
         return EmptyState(
           type: EmptyStateType.usage,
           customTitle: 'Failed to load profile',
+          useIllustration: true,
         );
       },
       data: (profile) {
@@ -152,6 +131,7 @@ class ProfileScreen extends ConsumerWidget {
           child: EmptyState(
             type: EmptyStateType.usage,
             customTitle: 'Failed to load balance',
+            useIllustration: true,
           ),
         );
       },
@@ -224,6 +204,7 @@ class ProfileScreen extends ConsumerWidget {
               return EmptyState(
                 type: EmptyStateType.usage,
                 customTitle: 'Failed to load usage',
+                useIllustration: true,
               );
             },
             data: (stats) => _buildUsageStats(stats),
@@ -264,6 +245,7 @@ class ProfileScreen extends ConsumerWidget {
               return EmptyState(
                 type: EmptyStateType.usage,
                 customTitle: 'Failed to load calendar',
+                useIllustration: true,
               );
             },
             data: (periods) => _buildStreakCalendar(periods, selectedPeriod),
