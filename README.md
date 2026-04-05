@@ -1,8 +1,8 @@
 # Kilo Remote Flutter
 
-Remote client for [Kilo CLI](https://github.com/Kilo-Org/kilo) - a Flutter mobile application for iOS and Android.
+Remote client for [Kilo CLI](https://github.com/Kilo-Org/kilocode) - a Flutter mobile application for iOS and Android.
 
-This application is designed to work with the [Kilo CLI](https://github.com/Kilo-Org/kilo) to provide a mobile interface for managing CLI sessions.
+This application is designed to work with the [Kilo CLI](https://github.com/Kilo-Org/kilocode) to provide a mobile interface for managing CLI sessions.
 
 ## Features
 
